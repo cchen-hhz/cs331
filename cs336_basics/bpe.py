@@ -8,12 +8,14 @@ import os
 
 class preTokenizer:
     def __init__(self, special_tokens: List[str]):
-        self.special_tokens = {token: token.encode('utf-8') for token in special_tokens}
         self.word_pat = re.compile(r"""'(?:[sdmt]|ll|ve|re)| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+""")
         if special_tokens:
-            special_token_pat = "|".join(token for token in self.special_tokens.keys())
+            special_tokens = sorted(special_tokens, key=len, reverse=True)
+            self.special_tokens = {token: token.encode('utf-8') for token in special_tokens}
+            special_token_pat = "|".join(re.escape(token) for token in self.special_tokens.keys())
             self.special_pat = re.compile(special_token_pat)
         else:
+            self.special_tokens = {}
             self.special_pat = None
 
     def tokenizer(self, text: str):
@@ -23,7 +25,6 @@ class preTokenizer:
             return
         
         chunks = self.special_pat.split(text)
-
         for chunk in chunks:
             if not chunk:
                 continue
@@ -153,9 +154,6 @@ class BPETrainer:
             return best_pair
         return None
 
-
-
-
 def _process_chunk(args):
     input_path, start, end, special_tokens = args
     pt = preTokenizer(special_tokens)
@@ -172,7 +170,7 @@ def bpe_train(
         vocab_size: int,
         speial_tokens: List[str]
 ) -> Tuple[Dict[int, bytes], List[Tuple[bytes, bytes]]]:
-    num_process = 10
+    num_process = 4
 
     split_token = b'<|endoftext|>'
     if speial_tokens:
@@ -197,5 +195,5 @@ def bpe_train(
     vocab, merges = trainer.train_from_counts(word_freq)
     return vocab, merges
 
-    
+
     

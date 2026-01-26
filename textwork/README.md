@@ -44,3 +44,19 @@ UTF-16 or UTF-32?
 -  BPE Training on OpenWebText
 
 > 本地机子没实力跑。
+
+### tokenizer impl
+
+- Implementing the tokenizer
+
+> 其实最后一个测试 XFAIL 是刻意不让通过的，直接加载全部文件还是太吃了。
+> 一些踩坑：
+> regex.split 不会保留配对 pattern，正则匹配时要用 () 包裹匹配获得匹配组，这样就能保留了。
+> 对 special_token 排序是必要的，一个测试测出了这个错误：<|endoftext|><|endoftext|>
+> 应该没了，采用的每次循环替换，比较低能，不过单个单次很短，应该没什么问题了，没有必要改链表。
+
+- Experiments with tokenizers
+
+> 这里统一采用 TinyStory 的 10k 词汇表，WebText 的练不起QED
+> compare for TinyStory-cut: 12976 and 3118, rate 0.24028976572133168
+> compare for owt-cut: 10147 and 3046, rate 0.30018724746230413
