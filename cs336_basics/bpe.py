@@ -71,7 +71,6 @@ class BPETrainer:
         for pair, freq in pair_freqs.items():
             heapq.heappush(heap, (-freq, pair))
 
-        print(f"init done, start training")
         while len(self.vocab) < self.require_vocab_size:
             best_pair = self._find_best_pair(heap, pair_freqs)
              
@@ -183,13 +182,10 @@ def bpe_train(
     for start, end in zip(boundaries[:-1], boundaries[1:]):
         chunk_args.append((input_path, start, end, speial_tokens))
 
-    print(f"Starting {num_process} processes...")
     word_freq = Counter()
     with multiprocessing.Pool(processes=num_process) as pool:
         for c in pool.imap_unordered(_process_chunk, chunk_args):
             word_freq.update(c)
-    
-    print(f"freq done")
 
     trainer = BPETrainer(vocab_size, speial_tokens)
     vocab, merges = trainer.train_from_counts(word_freq)

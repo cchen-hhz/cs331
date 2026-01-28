@@ -60,3 +60,88 @@ UTF-16 or UTF-32?
 > 这里统一采用 TinyStory 的 10k 词汇表，WebText 的练不起QED
 > compare for TinyStory-cut: 12976 and 3118, rate 0.24028976572133168
 > compare for owt-cut: 10147 and 3046, rate 0.30018724746230413
+
+## Transformer
+
+### Resource accounting
+
+参数信息：
+
+    vocab_size : 50,257
+    context_length : 1,024
+    num_layers : 48
+    d_model : 1,600
+    num_heads : 25
+    d_ff : 6,400
+
+- tainable parameters
+
+大致粗略的分析：
+
+|       主块        | 内部块    | 参数大小         | Matrix Flops                             |
+| :---------------: | --------- | ---------------- | ---------------------------------------- |
+|     Embedding     | Embedding | vocab $\times$ d | 0     
+| RoPE      |RoPE |2 d (sin+cos)    | 2 $\times$ seq |
+| Transformer Block | RMSNorm   | 0                | 0    $\times$ d                        
+|                   | Attention | 4 $d^2$          | 12 $\times$ seq $\times$ $d^2$           |
+|                   | SwiGLU    | 3 $d \times d_f$ | 6 $\times$ seq $\times d \times d_f$     |
+|      Linear       | Linear    | d $\times$ vocab | 2 $\times$ seq $\times$ d $\times$ vocab |
+
+
+在给定数据下：
+
+大致参数量 $8507622400$ ，运算量 $4694687744000$
+
+总空间大致为 8113 MB, 7.92GB。
+
+浮点运算 4.69e12，即 4.69 TFLOPs。
+
+Attention 和 SwiGLU 吃的比较多。
+
+## Training
+
+- Tuning the learning rate
+
+    - $lr=1$: loss 均匀减小，但收敛很慢。
+    - $lr=10$: loss 减小很快。
+    - $lr=100$: loss 几乎收敛，没有遇到发散的问题，可能测试比较简单。
+
+- Memory and FLOPS
+
+设 $P$ 是模型占用，$N$ 是层数，内存量大致为：
+
+$$P=12ND^2+(V+L)D$$
+
+因此，参数需要 $4P$ 存储参数，$4P$ 存储梯度，$8P$ 存储优化器（两个动量元），同时，激活内存大致为：
+
+$$4(NBHL^2+10NBNBLD)$$
+
+峰值内存要将这些全部加起来。
+
+前向传播的 FLOPs 为：
+
+1. Embedding: $2BLDV$
+2. Transformer: $8BLD^2+4BL^2D+5BHL^2$
+3. swiglu: $8BLD^2$
+
+总和大致为：
+
+$$N\times (24BLD^2+4BL^2D+5BHL^2) + 2BLDV + 5BLV$$
+
+反向传播需要 $2F$ 的FLOPS。
+
+优化器需要 $10P$ 的 FLOPS。
+
+|                  | 占用                                                 |
+| ---------------- | ---------------------------------------------------- |
+| 内存             | $$4(NBHL^2+10NBNBLD)$$                               |
+| 参数量           | $P=12ND^2+(V+L)D$                                    |
+| 前向传播FLOPs    | $$F=N\times (24BLD^2+4BL^2D+5BHL^2) + 2BLDV + 5BLV$$ |
+| 反向传播加优化器 | $$2F+10P$$                                           |
+
+在 GPT-2 XL 中，内存占用 $24.9+8.18B$ GB，单次正向加反向加优化，FLOPs 为 $1.036\times 10^{13}B$ 。
+
+在 A100 上，设 $B=1024$，训练 $40$ 万步，
+
+
+
