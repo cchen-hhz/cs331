@@ -10,4 +10,4 @@ def dotAttention(Q: torch.Tensor, K: torch.Tensor, V: torch.Tensor, mask):
     neg_inf = torch.tensor(float('-inf'), device=result.device, dtype=result.dtype)
     maskp = torch.where(mask, zero, neg_inf)
     result += maskp
-    return softmax(result) @ V
+    return softmax(result, dim=-1) @ V

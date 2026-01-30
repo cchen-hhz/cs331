@@ -143,7 +143,22 @@ $$N\times (24BLD^2+4BL^2D+5BHL^2) + 2BLDV + 5BLV$$
 
 在 A100 上，设 $B=1024$，训练 $40$ 万步，大约需要 $4651$ 天，$12.7$ 年。
 
+## Experiment
 
+按照文档的配置，配了一个 0.017 B 的模型，使用完整 tinyStory 数据集，训练如下：
 
+这里没有记录 val loss，实测和 train loss 相当。
 
+![](./imgs/image.png)
 
+一个生成如下：
+```pain
+Input: Once upon a time, there was a little boy, he fell in love with a little girl,
+------
+ there was a new cat named Lily.
+The next day, Tim and Lily was so much. They played together in the little boy. He had a little girl who lived in the big, they went to find her room. He knew it and found a little girl.
+"Can I'm a long time. He did not a small cat. She wanted to help the little boy and they found a big tree. They were scared.
+One day, a boy named Tom. He said, "Yes, "I'm sorry, you can you help me."
+"Yes, Mom!" The other kids and said, "You can you, I love you, and went back to go away!"
+-----Got end token, generating ended!-----
+```

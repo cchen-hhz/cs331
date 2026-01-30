@@ -1,0 +1,30 @@
+# Here is all hyper parameters for transformer
+
+# global settings
+batch_size: 8
+epochs: 200
+
+# lr schedule : cos annealing
+lr_max: 0.001
+lr_min: 0.000001
+Tw: 5 # Make sure <= epochs
+Tc: 140 # Make sure <= epochs
+
+# optimizer : AdamW
+weight_decay: 0.01
+beta1: 0.9
+beta2: 0.999
+
+# model settings
+vocab_size: 10000
+context_length: 256 # max sequence length
+num_layers: 4
+d_model: 512
+num_heads: 16 # Make sure to double divide d_model
+d_ff: 1344
+rope_theta: 10000 # RoPE setting
+
+# gradient clipping
+grad_clip: 1.0
+
+

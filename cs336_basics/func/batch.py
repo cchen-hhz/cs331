@@ -5,10 +5,10 @@ import torch
 def get_batch(dataset: npt.NDArray, batch_size: int, context_length:int, device: str):
     positions = torch.randint(len(dataset) - context_length, (batch_size,))
     x = torch.stack([torch.from_numpy(
-        dataset[i : i + context_length]
+        dataset[i : i + context_length].astype(np.int64)
     ) for i in positions])
     y = torch.stack([torch.from_numpy(
-        dataset[i + 1 : i + context_length + 1]
+        dataset[i + 1 : i + context_length + 1].astype(np.int64)
     ) for i in positions])
     x = x.to(device)
     y = y.to(device)

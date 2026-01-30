@@ -7,20 +7,22 @@ class AdamW(torch.optim.Optimizer):
     def __init__(self, params, lr=1e-3,
                  weight_decay = 0.01, 
                  betas = (0.9, 0.999),
+                 scheduler = None,
                  eps = 1e-8):
         assert lr >= 0
         defaults = {
             "lr": lr,
             "beta": betas,
             "eps": eps,
-            "decay": weight_decay
+            "decay": weight_decay,
+            "scheduler": scheduler
         }
         super().__init__(params, defaults)
     
     def step(self, closure: Optional[Callable] = None):
         loss = None if closure is None else closure()
         for group in self.param_groups:
-            lr = group['lr']
+            lr = group['lr'] if group['scheduler'] is None else group['scheduler'].gen_lr()
             beta1, beta2 = group['beta']
             eps = group['eps']
             decay = group['decay']
