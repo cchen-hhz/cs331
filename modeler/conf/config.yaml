@@ -1,14 +1,14 @@
 # Here is all hyper parameters for transformer
 
 # global settings
-batch_size: 8
-epochs: 200
+batch_size: 32
+epochs: 1000
 
 # lr schedule : cos annealing
-lr_max: 0.001
-lr_min: 0.000001
-Tw: 5 # Make sure <= epochs
-Tc: 140 # Make sure <= epochs
+lr_max: 6.0e-4
+lr_min: 6.0e-6
+Tw: 50   # Warmup steps
+Tc: 900  # Cosine decay steps
 
 # optimizer : AdamW
 weight_decay: 0.01
@@ -25,6 +25,6 @@ d_ff: 1344
 rope_theta: 10000 # RoPE setting
 
 # gradient clipping
-grad_clip: 1.0
+grad_clip: 10
 
 

@@ -57,17 +57,18 @@ class tokenizer:
             return [self.from_vocab[token]]
         
         token_list = [bytes([b]) for b in token]
-        result = []
+        
         while True:
             best_merge = None
-            merge_pri = -1
+            best_pri = float('inf')
             i = 0
             while i < len(token_list) - 1:
                 pair = (token_list[i], token_list[i+1])
                 if pair in self.merge_dict:
-                    if not best_merge or merge_pri > self.merge_dict[pair]:
+                    pri = self.merge_dict[pair]
+                    if pri < best_pri:
                         best_merge = pair
-                        merge_pri = self.merge_dict[pair]
+                        best_pri = pri
                 i += 1
             if not best_merge:
                 break

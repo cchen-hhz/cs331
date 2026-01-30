@@ -13,7 +13,6 @@ from cs336_basics.func.clipping import gradient_clipping
 from cs336_basics.func.crossEntropy import crossEntropyLoss
 from cs336_basics.func.saver import save_checkpoint, load_checkpoint
 
-# TODO: AdamW 没整合动态学习率调整，需要修改
 device = "cuda"
 
 root_dir = 'modeler'
@@ -31,13 +30,13 @@ with open(f'{conf_dir}/secret.yaml') as f:
 os.environ['WANDB_API_KEY']=secret_config['WANDB_API_KEY']
 
 # Wandb
-print(f"Login into wendb")
-wandb.login()
-run = wandb.init(
-    entity="cchen-hhz-company",
-    project="cs336",
-    config=config
-)
+#print(f"Login into wendb")
+#wandb.login()
+#run = wandb.init(
+#    entity="cchen-hhz-company",
+#    project="cs336",
+#    config=config
+#)
 
 # Load textdata
 train_data = np.memmap(f"{data_dir}/train.bin", np.uint16)
@@ -81,19 +80,19 @@ for epoch in range(1, config['epochs'] + 1):
 
     result = transformer(x) 
     loss_batch = crossEntropyLoss(result, y)
-    loss = torch.mean(loss_batch, dim=0)
+    loss = loss_batch.mean()
     print(f"epoch {epoch} with loss {loss.item()}, perplexity {math.exp(loss.item())}")
-    run.log({"loss": loss.item(), "perplexity": math.exp(loss.item())})
+    #run.log({"loss": loss.item(), "perplexity": math.exp(loss.item())})
 
     adamW.zero_grad()
     loss.backward()
     gradient_clipping(transformer.parameters(), config['grad_clip'])
     adamW.step()
 
-    if epoch % 5 == 0:
+    if epoch % 50 == 0:
         with torch.no_grad():
             val_loss = 0.
-            for _ in range(3):
+            for _ in range(50):
                 x, y = get_batch(val_data, 
                                     config['batch_size'],
                                     config['context_length'],
@@ -102,10 +101,10 @@ for epoch in range(1, config['epochs'] + 1):
                 loss = crossEntropyLoss(result, y).mean()
                 val_loss += loss
             
-        val_loss /= 3.
-        print(f"val loop: {val_loss} perplexity {math.exp(val_loss)}")
+        val_loss /= 50.
+        print(f"val loop (step {epoch}): {val_loss} perplexity {math.exp(val_loss)}")
     if epoch % 100 == 0:
-        print(f"save model and optim")
+        print(f"save model and optim at step {epoch}")
         save_checkpoint(transformer, adamW, epoch, f"{saver_dir}/{epoch}.pth")
 
 

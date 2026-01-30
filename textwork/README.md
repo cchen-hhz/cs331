@@ -145,20 +145,26 @@ $$N\times (24BLD^2+4BL^2D+5BHL^2) + 2BLDV + 5BLV$$
 
 ## Experiment
 
-按照文档的配置，配了一个 0.017 B 的模型，使用完整 tinyStory 数据集，训练如下：
+实际是在服务器训练的，所以超参数仅供参考。
+
+按照文档的配置，配了一个 0.017 B 的模型，使用完整 tinyStory 数据集，训练 5000 轮如下：
 
 这里没有记录 val loss，实测和 train loss 相当。
 
 ![](./imgs/image.png)
 
-一个生成如下：
+一个生成如下（好地狱啊）：
 ```pain
-Input: Once upon a time, there was a little boy, he fell in love with a little girl,
+Input: Once upon a time, there was a little boy named Ben.
 ------
- there was a new cat named Lily.
-The next day, Tim and Lily was so much. They played together in the little boy. He had a little girl who lived in the big, they went to find her room. He knew it and found a little girl.
-"Can I'm a long time. He did not a small cat. She wanted to help the little boy and they found a big tree. They were scared.
-One day, a boy named Tom. He said, "Yes, "I'm sorry, you can you help me."
-"Yes, Mom!" The other kids and said, "You can you, I love you, and went back to go away!"
+He was a good boy, and he had to help others with his terrible things.
+One day, Ben saw an angeL who Lived far away in the universe. Ben was so sad, he ran over to the fairy and said, "The universe is lost, help us find this best day to be gratefuL."The next day, Ben Looked in his backyard and saw the angeL standing in a bush. He was crying and started to cry. "I'm so hungry!"he said.The angel sighed and said, "I am so tired. Can you pLease bring me something?"
+Ben was so happy! He grabbed the angeL and ran out of her house. The angel ate him as he felt so full. Ben smiled, and the angeL said, "Good job, LittLe boy. I was so happy to havefriends and heLp each other!"
 -----Got end token, generating ended!-----
 ```
+
+- RMSNorm 的影响
+
+>在去除 Norm 层后，loss 下降率明显变满，也比较抖动（1000 轮 loss 在 5.x 附近），Norm 对模型的稳定性还是很重要的。
+
+剩下几个就咕咕了（逃

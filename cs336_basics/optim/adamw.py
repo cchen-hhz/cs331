@@ -32,16 +32,20 @@ class AdamW(torch.optim.Optimizer):
                     continue
 
                 state = self.state[p]
-                t = state.get('t', 1)
-                m = state.get('m', 0)
-                v = state.get('v', 0)
+                if len(state) == 0:
+                    state['t'] = 1
+                    state['m'] = torch.zeros_like(p.data)
+                    state['v'] = torch.zeros_like(p.data)
+                t = state['t']
+                m = state['m']
+                v = state['v']
                 grad = p.grad.data
                 
+                p.data -= lr * decay * p.data 
                 m = beta1 * m + (1. - beta1) * grad
                 v = beta2 * v + (1. - beta2) * grad * grad
                 lr_t = lr * math.sqrt(1 - math.pow(beta2, t)) / (1 - math.pow(beta1, t))
                 p.data -= lr_t * m / (torch.sqrt(v) + eps)
-                p.data -= lr * decay * p.data 
 
                 state['t'] = t + 1
                 state['m'] = m

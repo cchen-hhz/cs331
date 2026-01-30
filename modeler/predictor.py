@@ -11,9 +11,9 @@ from cs336_basics.func.softmax import softmax
 # hyper params
 p_config = {
     "model_name": "200.pth",
-    "temp": 1,
-    "top_p": 0.5,
-    "input": "Once upon a time, there was a little boy, he fell in love with a little girl,"
+    "temp": 1.4,
+    "top_p": 0.6,
+    "input": "Once upon a time there was a little boy named Ben."
 }
 
 root_dir = 'modeler'
